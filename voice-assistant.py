@@ -6,6 +6,7 @@ import command
 import os
 import json
 import wave
+import random
 
 ttsEngine = pyttsx3.init()
 recognizer = speech_recognition.Recognizer() #распознавание
@@ -38,14 +39,14 @@ def use_offline_recognition():#функция записи и распознав
     recognized_data = ""
     try:
         # проверка наличия модели на нужном языке в каталоге приложения
-        if not os.path.exists("models/vosk-model-small-ru-0.4"):
+        if not os.path.exists("model"):
             print("Please download the model from:\n"
                   "https://alphacephei.com/vosk/models and unpack as 'model' in the current folder.")
             exit(1)
 
         # анализ записанного в микрофон аудио (чтобы избежать повторов фразы)
         wave_audio_file = wave.open("microphone-results.wav", "rb")
-        model = Model("models/vosk-model-small-ru-0.4")
+        model = Model("model")
         offline_recognizer = KaldiRecognizer(model, wave_audio_file.getframerate())
 
         data = wave_audio_file.readframes(wave_audio_file.getnframes())
@@ -70,13 +71,21 @@ def play_voice_assistant_speech(text_to_speech): # говор этой скот�
 
 
 while True:
-    voice_input = record_and_recognize_audio()
+    voice_input =  record_and_recognize_audio()
+    print(voice_input)
     if voice_input in command.PONY_PAGE:
-        play_voice_assistant_speech('по вашей просьбе открываю порнуху с понями')
+        answer = 'по вашей просьбе открываю порнуху с понями'
+        play_voice_assistant_speech(answer)
         webbrowser.open('https://ragafich.github.io/my-little-test/')
-        
+        print(answer)
+
     elif voice_input in command.END_PROGRAMM:
         play_voice_assistant_speech('Завершение по просьбе')
         exit('Завершение по просьбе')
+
+    elif voice_input in command.GREETING:
+        answer = random.choice(['Хай, чувак', 'Привет глупый человек'])
+        play_voice_assistant_speech(answer)
+        print(answer)
+
     else: pass
-    print(voice_input)
