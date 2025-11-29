@@ -8,11 +8,17 @@ import json
 import wave
 import random
 
+import multiprocessing
+import telegram as bot
+
+
 ttsEngine = pyttsx3.init()
 recognizer = speech_recognition.Recognizer() #распознавание
 microphone = speech_recognition.Microphone() #микрофон
 voices = ttsEngine.getProperty("voices")
 ttsEngine.setProperty("voice", voices[0].id)
+
+    
 
 def record_and_recognize_audio(*args: tuple): #функция записи и распознавания онлайн 
     with microphone:
@@ -42,7 +48,7 @@ def use_offline_recognition():#функция записи и распознав
         if not os.path.exists("model"):
             print("Please download the model from:\n"
                   "https://alphacephei.com/vosk/models and unpack as 'model' in the current folder.")
-            exit(1)
+            # exit(1)
 
         # анализ записанного в микрофон аудио (чтобы избежать повторов фразы)
         wave_audio_file = wave.open("microphone-results.wav", "rb")
@@ -68,24 +74,46 @@ def play_voice_assistant_speech(text_to_speech): # говор этой скот�
     ttsEngine.runAndWait()
 
 
-
-
-while True:
-    voice_input =  record_and_recognize_audio()
-    print(voice_input)
-    if voice_input in command.PONY_PAGE:
+def send_command(_input, tg = False, chat = 0):
+    if _input in command.PONY_PAGE:
         answer = 'по вашей просьбе открываю порнуху с понями'
-        play_voice_assistant_speech(answer)
+        
         webbrowser.open('https://ragafich.github.io/my-little-test/')
         print(answer)
+        if not tg: play_voice_assistant_speech(answer)
+        else: bot.bot.send_message(chat, answer)
 
-    elif voice_input in command.END_PROGRAMM:
-        play_voice_assistant_speech('Завершение по просьбе')
+    elif _input in command.END_PROGRAMM:
+        if not tg: play_voice_assistant_speech('Завершение по просьбе')
         exit('Завершение по просьбе')
 
-    elif voice_input in command.GREETING:
-        answer = random.choice(['Хай, чувак', 'Привет глупый человек'])
-        play_voice_assistant_speech(answer)
-        print(answer)
+    elif _input in command.GREETING:
+        answer = random.choice(['Хай, чувак', 'Привет глупый человек', "привет", "здарова"])
+        if not tg: play_voice_assistant_speech(answer)
+        else: bot.bot.send_message(chat, answer)
 
     else: pass
+
+# def def_telegram():
+    
+
+def def_voice():
+    while True:
+        voice_input =  record_and_recognize_audio()
+        print(voice_input)
+        if voice_input != '':
+            send_command(voice_input)
+
+
+
+
+def basic_multiprocessing():
+    voice = multiprocessing.Process(target= def_voice)
+    telegram = multiprocessing.Process(target= bot.def_telegram)
+
+    voice.start()
+    telegram.start()
+
+if __name__ == "__main__":
+    basic_multiprocessing()
+    
